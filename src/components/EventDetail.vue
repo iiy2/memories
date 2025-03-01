@@ -20,6 +20,37 @@ function formatDate(dateString: string) {
   })
 }
 
+function formatTime(dateString: string) {
+  const date = new Date(dateString)
+  const now = new Date()
+  
+  // If the event is from today
+  if (date.toDateString() === now.toDateString()) {
+    return 'Today'
+  }
+  
+  // If the event was yesterday
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1)
+  if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday'
+  }
+  
+  // Calculate days ago for recent events (within 7 days)
+  const diffTime = Math.abs(now.getTime() - date.getTime())
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays < 7) {
+    return `${diffDays} days ago`
+  }
+  
+  // For older events, return the month and day
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
 // Get color for category
 function getCategoryColor(category: string): string {
   const colorMap: Record<string, string> = {
@@ -50,41 +81,59 @@ function getCategoryIcon(category: string): string {
 </script>
 
 <template>
-  <v-card v-if="event" class="h-100">
-    <v-card-title class="text-h4 pa-4">
-      {{ event.title }}
-    </v-card-title>
+  <div v-if="event">
+    <div class="d-flex align-center mb-6">
+      <v-avatar :color="getCategoryColor(event.category)" size="60" class="mr-4">
+        <v-icon :icon="getCategoryIcon(event.category)" size="large" color="white"></v-icon>
+      </v-avatar>
+      
+      <div>
+        <h1 class="text-h4 mb-1">{{ event.title }}</h1>
+        <div class="d-flex align-center">
+          <v-chip
+            :color="getCategoryColor(event.category)"
+            class="mr-3"
+            size="small"
+            variant="flat"
+          >
+            {{ event.category }}
+          </v-chip>
+          <div class="text-subtitle-1">
+            <v-icon icon="mdi-calendar" size="small" class="mr-1"></v-icon>
+            {{ formatDate(event.date) }}
+            <span class="text-caption ml-1 text-grey">({{ formatTime(event.date) }})</span>
+          </div>
+        </div>
+      </div>
+    </div>
     
-    <v-card-subtitle class="pb-0">
-      <v-chip
-        :color="getCategoryColor(event.category)"
-        class="mr-2"
-        size="small"
-        variant="flat"
-      >
-        <v-icon start :icon="getCategoryIcon(event.category)"></v-icon>
-        {{ event.category }}
-      </v-chip>
-      <span class="text-subtitle-1">{{ formatDate(event.date) }}</span>
-    </v-card-subtitle>
+    <v-divider class="mb-6"></v-divider>
     
-    <v-divider class="mx-4 my-4"></v-divider>
-    
-    <v-card-text class="text-body-1">
-      <div class="text-pre-wrap">{{ event.description || 'No description provided.' }}</div>
-    </v-card-text>
-  </v-card>
+    <div class="event-description">
+      <h2 class="text-h6 mb-3">Description</h2>
+      <div class="text-body-1 text-pre-wrap pa-2">
+        {{ event.description || 'No description provided.' }}
+      </div>
+    </div>
+  </div>
   
-  <v-card v-else class="h-100 d-flex align-center justify-center">
-    <v-card-text class="text-center">
+  <div v-else class="d-flex align-center justify-center" style="height: 300px">
+    <div class="text-center">
       <v-icon icon="mdi-calendar-blank" size="x-large" color="grey" class="mb-4"></v-icon>
       <h3 class="text-h5 text-grey">Select an event to view details</h3>
-    </v-card-text>
-  </v-card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .text-pre-wrap {
   white-space: pre-wrap;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  min-height: 100px;
+}
+
+.event-description {
+  margin-bottom: 24px;
 }
 </style>
