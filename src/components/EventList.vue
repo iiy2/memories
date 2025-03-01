@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+interface EventType {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  enabled: boolean;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -10,7 +18,8 @@ interface Event {
 }
 
 const props = defineProps<{
-  events: Event[]
+  events: Event[],
+  eventTypes: EventType[]
 }>()
 
 const emit = defineEmits<{
@@ -19,11 +28,12 @@ const emit = defineEmits<{
 }>()
 
 const search = ref('')
-const filterCategory = ref('')
+const filterCategory = ref('All')
 
-const categories = [
-  'All', 'Personal', 'Work', 'Family', 'Health', 'Travel', 'Other'
-]
+// Generate category filter options
+const categories = computed(() => {
+  return ['All', ...props.eventTypes.filter(et => et.enabled).map(et => et.name)]
+})
 
 const filteredEvents = computed(() => {
   return props.events
@@ -49,32 +59,21 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString()
 }
 
+// Get event type by category name
+function getEventType(category: string): EventType | undefined {
+  return props.eventTypes.find(et => et.name === category)
+}
+
 // Get color for category
 function getCategoryColor(category: string): string {
-  const colorMap: Record<string, string> = {
-    'Personal': 'blue',
-    'Work': 'amber',
-    'Family': 'pink',
-    'Health': 'green',
-    'Travel': 'purple',
-    'Other': 'grey'
-  }
-  
-  return colorMap[category] || 'primary'
+  const eventType = getEventType(category)
+  return eventType ? eventType.color : 'primary'
 }
 
 // Get icon for category
 function getCategoryIcon(category: string): string {
-  const iconMap: Record<string, string> = {
-    'Personal': 'mdi-account',
-    'Work': 'mdi-briefcase',
-    'Family': 'mdi-home-heart',
-    'Health': 'mdi-heart-pulse',
-    'Travel': 'mdi-airplane',
-    'Other': 'mdi-star'
-  }
-  
-  return iconMap[category] || 'mdi-calendar'
+  const eventType = getEventType(category)
+  return eventType ? eventType.icon : 'mdi-calendar'
 }
 </script>
 
@@ -109,7 +108,31 @@ function getCategoryIcon(category: string): string {
             hide-details
             variant="outlined"
             single-line
-          ></v-select>
+          >
+            <template v-slot:selection="{ item }">
+              <template v-if="item.raw !== 'All' && getEventType(item.raw)">
+                <v-icon :icon="getCategoryIcon(item.raw)" :color="getCategoryColor(item.raw)" class="mr-2"></v-icon>
+                {{ item.raw }}
+              </template>
+              <template v-else>
+                <v-icon icon="mdi-filter-variant" class="mr-2"></v-icon>
+                {{ item.raw }}
+              </template>
+            </template>
+            <template v-slot:item="{ item, props }">
+              <v-list-item v-bind="props">
+                <template v-slot:prepend>
+                  <template v-if="item.raw !== 'All' && getEventType(item.raw)">
+                    <v-icon :icon="getCategoryIcon(item.raw)" :color="getCategoryColor(item.raw)"></v-icon>
+                  </template>
+                  <template v-else>
+                    <v-icon icon="mdi-filter-variant"></v-icon>
+                  </template>
+                </template>
+                <v-list-item-title>{{ item.raw }}</v-list-item-title>
+              </v-list-item>
+            </template>
+          </v-select>
         </v-col>
       </v-row>
     </v-card-text>

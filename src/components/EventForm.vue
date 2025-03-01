@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+interface EventType {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  enabled: boolean;
+}
+
+const props = defineProps<{
+  eventTypes: EventType[]
+}>()
+
 const emit = defineEmits<{
   (e: 'addEvent', event: {
     title: string;
@@ -15,7 +27,6 @@ const date = ref('')
 const description = ref('')
 const category = ref('')
 const formValid = ref(false)
-const categories = ['Personal', 'Work', 'Family', 'Health', 'Travel', 'Other']
 
 // Set default date to today
 onMounted(() => {
@@ -24,6 +35,11 @@ onMounted(() => {
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   date.value = `${year}-${month}-${day}`
+  
+  // Set default category to first available
+  if (props.eventTypes.length > 0) {
+    category.value = props.eventTypes[0].name
+  }
 })
 
 const titleRules = [
@@ -39,18 +55,9 @@ const categoryRules = [
   (v: string) => !!v || 'Category is required'
 ]
 
-// Get icon for category
-function getCategoryIcon(category: string): string {
-  const iconMap: Record<string, string> = {
-    'Personal': 'mdi-account',
-    'Work': 'mdi-briefcase',
-    'Family': 'mdi-home-heart',
-    'Health': 'mdi-heart-pulse',
-    'Travel': 'mdi-airplane',
-    'Other': 'mdi-star'
-  }
-  
-  return iconMap[category] || 'mdi-calendar'
+// Get event type by name
+function getEventType(name: string): EventType | undefined {
+  return props.eventTypes.find(et => et.name === name)
 }
 
 function submitForm() {
@@ -100,20 +107,29 @@ function submitForm() {
         <v-select
           v-model="category"
           label="Category"
-          :items="categories"
+          :items="props.eventTypes.map(et => et.name)"
           :rules="categoryRules"
           required
           variant="outlined"
           density="comfortable"
+          :disabled="props.eventTypes.length === 0"
+          :hint="props.eventTypes.length === 0 ? 'Add event types in Settings' : ''"
+          persistent-hint
         >
           <template v-slot:selection="{ item }">
-            <v-icon :icon="getCategoryIcon(item.raw)" class="mr-2"></v-icon>
-            {{ item.raw }}
+            <template v-if="getEventType(item.raw)">
+              <v-icon :icon="getEventType(item.raw)?.icon" class="mr-2" :color="getEventType(item.raw)?.color"></v-icon>
+              {{ item.raw }}
+            </template>
           </template>
           <template v-slot:item="{ item, props }">
             <v-list-item v-bind="props">
               <template v-slot:prepend>
-                <v-icon :icon="getCategoryIcon(item.raw)"></v-icon>
+                <v-icon 
+                  v-if="getEventType(item.raw)"
+                  :icon="getEventType(item.raw)?.icon" 
+                  :color="getEventType(item.raw)?.color"
+                ></v-icon>
               </template>
               <v-list-item-title>{{ item.raw }}</v-list-item-title>
             </v-list-item>

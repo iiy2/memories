@@ -1,4 +1,12 @@
 <script setup lang="ts">
+interface EventType {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  enabled: boolean;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -8,7 +16,8 @@ interface Event {
 }
 
 const props = defineProps<{
-  event: Event | null
+  event: Event | null,
+  eventTypes: EventType[]
 }>()
 
 function formatDate(dateString: string) {
@@ -51,32 +60,21 @@ function formatTime(dateString: string) {
   })
 }
 
+// Get event type by category name
+function getEventType(category: string): EventType | undefined {
+  return props.eventTypes.find(et => et.name === category)
+}
+
 // Get color for category
 function getCategoryColor(category: string): string {
-  const colorMap: Record<string, string> = {
-    'Personal': 'blue',
-    'Work': 'amber',
-    'Family': 'pink',
-    'Health': 'green',
-    'Travel': 'purple',
-    'Other': 'grey'
-  }
-  
-  return colorMap[category] || 'primary'
+  const eventType = getEventType(category)
+  return eventType ? eventType.color : 'primary'
 }
 
 // Get icon for category
 function getCategoryIcon(category: string): string {
-  const iconMap: Record<string, string> = {
-    'Personal': 'mdi-account',
-    'Work': 'mdi-briefcase',
-    'Family': 'mdi-home-heart',
-    'Health': 'mdi-heart-pulse',
-    'Travel': 'mdi-airplane',
-    'Other': 'mdi-star'
-  }
-  
-  return iconMap[category] || 'mdi-calendar'
+  const eventType = getEventType(category)
+  return eventType ? eventType.icon : 'mdi-calendar'
 }
 </script>
 
