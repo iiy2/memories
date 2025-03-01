@@ -18,6 +18,8 @@
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.7.2",
     "vite": "^4.5.9",
-    "vue-tsc": "^2.2.4"
+    "vite-plugin-pwa": "^0.21.1",
+    "vue-tsc": "^2.2.4",
+    "workbox-window": "^7.3.0"
   }
 }

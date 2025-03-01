@@ -1,6 +1,6 @@
 # Memory AI - Life Events Tracker
 
-A Vue.js application for storing and tracking important events from your life. Built with Vue 3, TypeScript, and Vuetify (Material UI).
+A Progressive Web App (PWA) for storing and tracking important events from your life. Built with Vue 3, TypeScript, and Vuetify (Material UI).
 
 ## Features
 
@@ -9,6 +9,12 @@ A Vue.js application for storing and tracking important events from your life. B
 - See detailed information about each event
 - Delete events you no longer want to track
 - Data persists in local storage
+- **Progressive Web App (PWA) Features:**
+  - Installable on desktop and mobile devices
+  - Works offline
+  - Fast load times
+  - Automatic updates
+  - Responsive design for all screen sizes
 
 ## Categories
 
@@ -61,6 +67,10 @@ This will generate optimized production files in the `dist` directory.
 - Vuetify (Material UI)
 - Vite
 - localStorage for data persistence
+- Progressive Web App (PWA) features using:
+  - vite-plugin-pwa
+  - Service Workers
+  - Web App Manifest
 
 ## Project Structure
 
@@ -69,7 +79,10 @@ This will generate optimized production files in the `dist` directory.
   - `EventForm.vue` - Form for adding new events
   - `EventList.vue` - List of all stored events
   - `EventDetail.vue` - Detailed view of a selected event
-- `src/main.ts` - Application entry point with Vuetify configuration
+  - `PwaNotification.vue` - PWA update and offline notifications
+- `src/main.ts` - Application entry point with Vuetify and PWA configuration
+- `public/` - Static assets and PWA icons
+- `vite.config.ts` - Vite configuration including PWA settings
 
 ## License
 

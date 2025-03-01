@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import EventForm from './components/EventForm.vue'
 import EventList from './components/EventList.vue'
 import EventDetail from './components/EventDetail.vue'
+import PwaNotification from './components/PwaNotification.vue'
 
 interface Event {
   id: string;
@@ -180,5 +181,8 @@ function closeEventForm() {
         &copy; {{ new Date().getFullYear() }} - Memory AI
       </div>
     </v-footer>
+    
+    <!-- PWA notifications -->
+    <PwaNotification />
   </v-app>
 </template>
