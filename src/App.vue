@@ -1,36 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import EventForm from './components/EventForm.vue'
 import EventList from './components/EventList.vue'
 import EventDetail from './components/EventDetail.vue'
 import EventSettings from './components/EventSettings.vue'
 import PwaNotification from './components/PwaNotification.vue'
+import AuthContainer from './components/auth/AuthContainer.vue'
+import UserProfile from './components/auth/UserProfile.vue'
 
-interface EventType {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-  enabled: boolean;
-}
+// Import stores
+import { useAuthStore } from './stores/auth'
+import { useEventStore } from './stores/events'
+import { useEventTypeStore } from './stores/eventTypes'
+import { EventType } from './stores/eventTypes'
+import { Event } from './stores/events'
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  category: string;
-}
+// Initialize stores
+const authStore = useAuthStore()
+const eventStore = useEventStore()
+const eventTypeStore = useEventTypeStore()
 
-const events = ref<Event[]>([])
-const eventTypes = ref<EventType[]>([
-  { id: 'personal', name: 'Personal', color: 'blue', icon: 'mdi-account', enabled: true },
-  { id: 'work', name: 'Work', color: 'amber', icon: 'mdi-briefcase', enabled: true },
-  { id: 'family', name: 'Family', color: 'pink', icon: 'mdi-home-heart', enabled: true },
-  { id: 'health', name: 'Health', color: 'green', icon: 'mdi-heart-pulse', enabled: true },
-  { id: 'travel', name: 'Travel', color: 'purple', icon: 'mdi-airplane', enabled: true },
-  { id: 'other', name: 'Other', color: 'grey', icon: 'mdi-star', enabled: true }
-])
+// UI state
 const selectedEvent = ref<Event | null>(null)
 const showEventForm = ref(false)
 const showEventDetail = ref(false)
@@ -38,148 +28,163 @@ const showDeleteDialog = ref(false)
 const showSettingsDialog = ref(false)
 const eventToDelete = ref<string | null>(null)
 
-// Load events and event types from localStorage on component mount
+// Set up auth listener and initialize data on mount
 onMounted(() => {
-  const savedEvents = localStorage.getItem('memoryEvents')
-  if (savedEvents) {
-    events.value = JSON.parse(savedEvents)
+  // If user is already authenticated, fetch data
+  if (authStore.isAuthenticated) {
+    initializeData()
   }
   
-  const savedEventTypes = localStorage.getItem('memoryEventTypes')
-  if (savedEventTypes) {
-    eventTypes.value = JSON.parse(savedEventTypes)
-  }
+  // Listen for auth state changes
+  watch(() => authStore.isAuthenticated, (isAuthenticated) => {
+    if (isAuthenticated) {
+      initializeData()
+    } else {
+      // Clean up when user logs out
+      eventStore.unsubscribeFromEvents()
+      eventTypeStore.unsubscribeFromEventTypes()
+    }
+  })
 })
 
-// Save events to localStorage whenever they change
-function saveEvents() {
-  localStorage.setItem('memoryEvents', JSON.stringify(events.value))
+// Initialize data (subscribe to Firestore collections)
+function initializeData() {
+  // Subscribe to real-time updates
+  eventStore.subscribeToEvents()
+  eventTypeStore.subscribeToEventTypes()
 }
 
-// Save event types to localStorage whenever they change
-function saveEventTypes() {
-  localStorage.setItem('memoryEventTypes', JSON.stringify(eventTypes.value))
-}
-
-// Get event name by ID
+// Event name for deletion confirmation
 const eventToDeleteName = computed(() => {
   if (!eventToDelete.value) return ''
-  const event = events.value.find(e => e.id === eventToDelete.value)
+  const event = eventStore.events.find(e => e.id === eventToDelete.value)
   return event ? event.title : ''
 })
 
-function addEvent(event: Omit<Event, 'id'>) {
-  const newEvent = {
-    ...event,
-    id: crypto.randomUUID()
+// Add a new event
+async function addEvent(event: Omit<Event, 'id'>) {
+  try {
+    await eventStore.addEvent(event)
+    showEventForm.value = false
+  } catch (error) {
+    console.error('Error adding event:', error)
   }
-  events.value.push(newEvent)
-  saveEvents()
-  showEventForm.value = false
 }
 
+// Delete event confirmation
 function confirmDeleteEvent(id: string) {
   eventToDelete.value = id
   showDeleteDialog.value = true
 }
 
-function executeDeleteEvent() {
+// Execute event deletion
+async function executeDeleteEvent() {
   if (!eventToDelete.value) return
   
-  events.value = events.value.filter(event => event.id !== eventToDelete.value)
-  if (selectedEvent.value?.id === eventToDelete.value) {
-    selectedEvent.value = null
-    showEventDetail.value = false
+  try {
+    await eventStore.deleteEvent(eventToDelete.value)
+    
+    // Close detail view if the deleted event was selected
+    if (selectedEvent.value?.id === eventToDelete.value) {
+      selectedEvent.value = null
+      showEventDetail.value = false
+    }
+  } catch (error) {
+    console.error('Error deleting event:', error)
+  } finally {
+    showDeleteDialog.value = false
+    eventToDelete.value = null
   }
-  saveEvents()
-  showDeleteDialog.value = false
-  eventToDelete.value = null
 }
 
+// Cancel event deletion
 function cancelDeleteEvent() {
   showDeleteDialog.value = false
   eventToDelete.value = null
 }
 
+// Select an event to view details
 function selectEvent(event: Event) {
   selectedEvent.value = event
   showEventDetail.value = true
 }
 
+// Close event detail dialog
 function closeEventDetail() {
   showEventDetail.value = false
   selectedEvent.value = null
 }
 
+// Close event form dialog
 function closeEventForm() {
   showEventForm.value = false
 }
 
+// Toggle settings dialog
 function toggleSettingsDialog() {
   showSettingsDialog.value = !showSettingsDialog.value
 }
 
-function addEventType(eventType: Omit<EventType, 'id'>) {
-  const id = eventType.name.toLowerCase().replace(/\s+/g, '-')
-  const newEventType = {
-    ...eventType,
-    id
-  }
-  
-  // Check if the event type already exists
-  const existingType = eventTypes.value.find(et => et.id === id || et.name === eventType.name)
-  if (existingType) {
-    // If it exists but is disabled, just enable it
-    if (!existingType.enabled) {
-      existingType.enabled = true
-      existingType.color = eventType.color
-      existingType.icon = eventType.icon
-      saveEventTypes()
-    }
-    return
-  }
-  
-  eventTypes.value.push(newEventType)
-  saveEventTypes()
-}
-
-function updateEventType(eventType: EventType) {
-  const index = eventTypes.value.findIndex(et => et.id === eventType.id)
-  if (index !== -1) {
-    eventTypes.value[index] = eventType
-    saveEventTypes()
+// Add a new event type
+async function addEventType(eventType: Omit<EventType, 'id'>) {
+  try {
+    await eventTypeStore.addEventType(eventType)
+  } catch (error) {
+    console.error('Error adding event type:', error)
   }
 }
 
-function removeEventType(id: string) {
-  // Check if there are any events with this category
-  const hasEvents = events.value.some(event => event.category.toLowerCase() === id)
-  
-  if (hasEvents) {
-    // If events exist with this category, just disable it instead of removing
-    const eventType = eventTypes.value.find(et => et.id === id)
-    if (eventType) {
-      eventType.enabled = false
-      saveEventTypes()
-    }
-  } else {
-    // If no events use this category, we can remove it completely
-    eventTypes.value = eventTypes.value.filter(et => et.id !== id)
-    saveEventTypes()
+// Update an existing event type
+async function updateEventType(eventType: EventType) {
+  try {
+    await eventTypeStore.updateEventType(eventType.id, {
+      name: eventType.name,
+      color: eventType.color,
+      icon: eventType.icon,
+      enabled: eventType.enabled
+    })
+  } catch (error) {
+    console.error('Error updating event type:', error)
   }
 }
 
-function toggleEventType(id: string) {
-  const eventType = eventTypes.value.find(et => et.id === id)
-  if (eventType) {
-    eventType.enabled = !eventType.enabled
-    saveEventTypes()
+// Remove an event type
+async function removeEventType(id: string) {
+  try {
+    await eventTypeStore.deleteEventType(id)
+  } catch (error) {
+    console.error('Error removing event type:', error)
   }
+}
+
+// Toggle event type enabled status
+async function toggleEventType(id: string) {
+  try {
+    await eventTypeStore.toggleEventType(id)
+  } catch (error) {
+    console.error('Error toggling event type:', error)
+  }
+}
+
+// Handle logout
+function handleLogout() {
+  // Cleanup any references
+  selectedEvent.value = null
+  showEventForm.value = false
+  showEventDetail.value = false
+  showSettingsDialog.value = false
 }
 </script>
 
 <template>
-  <v-app>
+  <!-- Show auth container when not authenticated -->
+  <AuthContainer 
+    v-if="!authStore.isAuthenticated"
+    @auth-success="initializeData"
+  />
+  
+  <!-- Show main application when authenticated -->
+  <v-app v-else>
     <v-app-bar color="primary" dark app>
       <v-app-bar-title>Memory AI - Your Life Events</v-app-bar-title>
       <v-spacer></v-spacer>
@@ -198,14 +203,25 @@ function toggleEventType(id: string) {
       >
         <v-icon>mdi-cog</v-icon>
       </v-btn>
+      <UserProfile 
+        class="ml-2"
+        @logout="handleLogout"
+      />
     </v-app-bar>
 
     <v-main>
       <v-container fluid>
+        <!-- Loading indicator -->
+        <v-progress-linear
+          v-if="eventStore.loading || eventTypeStore.loading"
+          indeterminate
+          color="primary"
+        ></v-progress-linear>
+        
         <!-- Main Events List -->
         <EventList 
-          :events="events"
-          :event-types="eventTypes"
+          :events="eventStore.events"
+          :event-types="eventTypeStore.eventTypes"
           @select-event="selectEvent" 
           @delete-event="confirmDeleteEvent" 
         />
@@ -229,7 +245,7 @@ function toggleEventType(id: string) {
         <v-card-text>
           <EventForm 
             @add-event="addEvent"
-            :event-types="eventTypes.filter(et => et.enabled)"
+            :event-types="eventTypeStore.enabledEventTypes"
           />
         </v-card-text>
       </v-card>
@@ -251,7 +267,7 @@ function toggleEventType(id: string) {
         <v-card-text>
           <EventDetail 
             :event="selectedEvent"
-            :event-types="eventTypes"
+            :event-types="eventTypeStore.eventTypes"
           />
         </v-card-text>
       </v-card>
@@ -282,12 +298,6 @@ function toggleEventType(id: string) {
       </v-card>
     </v-dialog>
 
-    <v-footer app>
-      <div class="mx-auto">
-        &copy; {{ new Date().getFullYear() }} - Memory AI
-      </div>
-    </v-footer>
-    
     <!-- Settings Dialog -->
     <v-dialog
       v-model="showSettingsDialog"
@@ -304,7 +314,7 @@ function toggleEventType(id: string) {
         </v-card-title>
         <v-card-text>
           <EventSettings 
-            :event-types="eventTypes"
+            :event-types="eventTypeStore.eventTypes"
             @add-event-type="addEventType"
             @update-event-type="updateEventType"
             @remove-event-type="removeEventType"
@@ -314,6 +324,12 @@ function toggleEventType(id: string) {
       </v-card>
     </v-dialog>
 
+    <v-footer app>
+      <div class="mx-auto">
+        &copy; {{ new Date().getFullYear() }} - Memory AI
+      </div>
+    </v-footer>
+    
     <!-- PWA notifications -->
     <PwaNotification />
   </v-app>
