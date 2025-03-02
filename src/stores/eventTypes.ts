@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { 
-  FirestoreEventType, 
+  type FirestoreEventType, 
   addEventType as firestoreAddEventType,
   updateEventType as firestoreUpdateEventType,
   deleteEventType as firestoreDeleteEventType,

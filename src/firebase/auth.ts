@@ -5,7 +5,7 @@ import {
   sendPasswordResetEmail,
   updateProfile,
   onAuthStateChanged,
-  User
+  type User,
 } from 'firebase/auth'
 import { auth } from './config'
 

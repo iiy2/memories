@@ -27,6 +27,7 @@ const date = ref('')
 const description = ref('')
 const category = ref('')
 const formValid = ref(false)
+const formSubmitting = ref(false)
 
 // Set default date to today
 onMounted(() => {
@@ -60,21 +61,35 @@ function getEventType(name: string): EventType | undefined {
   return props.eventTypes.find(et => et.name === name)
 }
 
-function submitForm() {
+async function submitForm() {
   if (!formValid.value) return
   
-  emit('addEvent', {
-    title: title.value,
-    date: date.value,
-    description: description.value,
-    category: category.value
-  })
+  formSubmitting.value = true
   
-  // Reset form
-  title.value = ''
-  date.value = ''
-  description.value = ''
-  category.value = ''
+  try {
+    emit('addEvent', {
+      title: title.value,
+      date: new Date(date.value),
+      description: description.value,
+      category: category.value
+    })
+    
+    // Reset form
+    title.value = ''
+    description.value = ''
+    category.value = ''
+    
+    // Set date to today again
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    date.value = `${year}-${month}-${day}`
+  } catch (error) {
+    console.error('Error submitting form:', error)
+  } finally {
+    formSubmitting.value = false
+  }
 }
 </script>
 
@@ -149,12 +164,23 @@ function submitForm() {
       persistent-hint
     ></v-textarea>
     
-    <div class="d-flex justify-end mt-4">
+    <div class="d-flex mt-6">
+      <v-spacer></v-spacer>
+      <v-btn 
+        type="reset" 
+        color="grey-darken-1" 
+        variant="text"
+        size="large"
+        class="mr-2"
+      >
+        Clear Form
+      </v-btn>
       <v-btn 
         type="submit" 
         color="primary" 
         :disabled="!formValid"
         size="large"
+        :loading="formSubmitting"
       >
         <v-icon start>mdi-content-save</v-icon>
         Save Event

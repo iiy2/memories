@@ -6,13 +6,14 @@ import { getAuth } from 'firebase/auth'
 // NOTE: In a production app, these values should be stored in environment variables
 // For this demo, we're placing them directly in the code
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-}
+  apiKey: "AIzaSyCAh1ikylWptE6qUPBcfiRPAue5TgRQ6C4",
+  authDomain: "memories-419ca.firebaseapp.com",
+  projectId: "memories-419ca",
+  storageBucket: "memories-419ca.firebasestorage.app",
+  messagingSenderId: "1092339841271",
+  appId: "1:1092339841271:web:28d126d763e8f9dc537bf2",
+  measurementId: "G-80VYXXMK1P"
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)

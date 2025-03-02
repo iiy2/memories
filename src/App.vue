@@ -210,7 +210,7 @@ function handleLogout() {
     </v-app-bar>
 
     <v-main>
-      <v-container fluid>
+      <v-container fluid class="pa-0 pa-sm-2 pa-md-4">
         <!-- Loading indicator -->
         <v-progress-linear
           v-if="eventStore.loading || eventTypeStore.loading"
@@ -224,6 +224,7 @@ function handleLogout() {
           :event-types="eventTypeStore.eventTypes"
           @select-event="selectEvent" 
           @delete-event="confirmDeleteEvent" 
+          class="mx-auto"
         />
       </v-container>
     </v-main>
@@ -231,7 +232,8 @@ function handleLogout() {
     <!-- Event Form Dialog -->
     <v-dialog
       v-model="showEventForm"
-      max-width="600px"
+      max-width="800px"
+      width="100%"
     >
       <v-card>
         <v-card-title class="text-h5">
@@ -254,7 +256,8 @@ function handleLogout() {
     <!-- Event Detail Dialog -->
     <v-dialog
       v-model="showEventDetail"
-      max-width="800px"
+      max-width="1000px"
+      width="100%"
     >
       <v-card v-if="selectedEvent">
         <v-card-title class="text-h5">
@@ -301,7 +304,8 @@ function handleLogout() {
     <!-- Settings Dialog -->
     <v-dialog
       v-model="showSettingsDialog"
-      max-width="900px"
+      max-width="1200px"
+      width="100%"
     >
       <v-card>
         <v-card-title class="text-h5">

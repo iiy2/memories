@@ -109,9 +109,11 @@ function getCategoryIcon(category: string): string {
     
     <div class="event-description">
       <h2 class="text-h6 mb-3">Description</h2>
-      <div class="text-body-1 text-pre-wrap pa-2">
-        {{ event.description || 'No description provided.' }}
-      </div>
+      <v-card elevation="0" variant="outlined" class="pa-4 bg-grey-lighten-5">
+        <div class="text-body-1 text-pre-wrap">
+          {{ event.description || 'No description provided.' }}
+        </div>
+      </v-card>
     </div>
   </div>
   
@@ -126,12 +128,23 @@ function getCategoryIcon(category: string): string {
 <style scoped>
 .text-pre-wrap {
   white-space: pre-wrap;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
   min-height: 100px;
+  line-height: 1.6;
 }
 
 .event-description {
   margin-bottom: 24px;
+}
+
+/* Print styles for when user wants to print an event */
+@media print {
+  .event-description {
+    break-inside: avoid;
+  }
+  
+  .text-pre-wrap {
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
 }
 </style>

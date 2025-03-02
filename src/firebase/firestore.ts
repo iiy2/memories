@@ -13,7 +13,7 @@ import {
   setDoc,
   onSnapshot,
   QuerySnapshot,
-  DocumentData
+  type DocumentData,
 } from 'firebase/firestore'
 import { db } from './config'
 

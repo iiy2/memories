@@ -78,7 +78,7 @@ function getCategoryIcon(category: string): string {
 </script>
 
 <template>
-  <v-card elevation="1" class="mx-auto" width="100%">
+  <v-card elevation="1" class="mx-auto" style="max-width: 1400px; width: 100%">
     <v-card-title class="d-flex align-center">
       <v-icon start icon="mdi-format-list-bulleted" class="mr-2"></v-icon>
       <span class="text-h5">Your Life Events</span>
@@ -86,24 +86,25 @@ function getCategoryIcon(category: string): string {
     </v-card-title>
     
     <v-card-text>
-      <v-row>
+      <v-row align="center" justify="start">
         <v-col cols="12" sm="6" md="8">
           <v-text-field
             v-model="search"
             clearable
             hide-details
-            label="Search events"
+            label="Search events by title, description..."
             prepend-inner-icon="mdi-magnify"
             density="comfortable"
             variant="outlined"
             single-line
+            class="search-field"
           ></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" md="4">
           <v-select
             v-model="filterCategory"
             :items="categories"
-            label="Category"
+            label="Filter by Category"
             density="comfortable"
             hide-details
             variant="outlined"
@@ -135,37 +136,101 @@ function getCategoryIcon(category: string): string {
           </v-select>
         </v-col>
       </v-row>
+
+      <!-- Show filter summary and count -->
+      <div class="d-flex align-center px-1 py-2">
+        <span class="text-subtitle-2">
+          <strong>{{ filteredEvents.length }}</strong> 
+          {{ filteredEvents.length === 1 ? 'event' : 'events' }} found
+          <template v-if="filterCategory && filterCategory !== 'All'">
+            in <v-chip size="x-small" :color="getCategoryColor(filterCategory)" class="ml-1">{{ filterCategory }}</v-chip>
+          </template>
+          <template v-if="search">
+            <span class="ml-1">matching "<strong>{{ search }}</strong>"</span>
+          </template>
+        </span>
+        <v-spacer></v-spacer>
+        <v-btn 
+          v-if="search || (filterCategory && filterCategory !== 'All')"
+          size="small" 
+          variant="text" 
+          color="primary"
+          @click="() => { search = ''; filterCategory = 'All'; }"
+        >
+          <v-icon start>mdi-filter-remove</v-icon>
+          Clear filters
+        </v-btn>
+      </div>
     </v-card-text>
     
     <v-divider></v-divider>
     
-    <v-card-text class="pa-0">
-      <v-list v-if="filteredEvents.length > 0" lines="two">
-        <v-list-item
-          v-for="event in filteredEvents"
-          :key="event.id"
-          @click="emit('selectEvent', event)"
-          :title="event.title"
-          :subtitle="formatDate(event.date)"
-          class="event-item"
-        >
-          <template v-slot:prepend>
-            <v-avatar size="48" :color="getCategoryColor(event.category)" class="mr-4">
-              <v-icon :icon="getCategoryIcon(event.category)" color="white"></v-icon>
-            </v-avatar>
-          </template>
-          
-          <template v-slot:append>
-            <v-btn
-              icon="mdi-delete"
-              variant="text"
-              color="error"
-              density="compact"
-              @click.stop="emit('deleteEvent', event.id)"
-            ></v-btn>
-          </template>
-        </v-list-item>
-      </v-list>
+    <v-card-text class="pa-4">
+      <div v-if="filteredEvents.length > 0">
+        <v-row>
+          <v-col 
+            v-for="event in filteredEvents" 
+            :key="event.id"
+            cols="12" sm="6" md="4" lg="3"
+            class="pa-2"
+          >
+            <v-card
+              elevation="2"
+              hover
+              @click="emit('selectEvent', event)"
+              class="event-card h-100"
+            >
+              <v-card-item>
+                <template v-slot:prepend>
+                  <v-avatar :color="getCategoryColor(event.category)" size="42">
+                    <v-icon :icon="getCategoryIcon(event.category)" color="white"></v-icon>
+                  </v-avatar>
+                </template>
+                <v-card-title class="text-truncate">{{ event.title }}</v-card-title>
+                <template v-slot:append>
+                  <v-btn
+                    icon="mdi-delete"
+                    variant="text"
+                    color="error"
+                    density="compact"
+                    @click.stop="emit('deleteEvent', event.id)"
+                  ></v-btn>
+                </template>
+              </v-card-item>
+              
+              <v-card-text class="pb-0">
+                <v-chip
+                  size="small"
+                  :color="getCategoryColor(event.category)"
+                  variant="flat"
+                  class="mb-2"
+                >
+                  {{ event.category }}
+                </v-chip>
+                <div class="text-body-2 text-medium-emphasis mt-1">
+                  <v-icon icon="mdi-calendar" size="small" class="mr-1"></v-icon>
+                  {{ formatDate(event.date) }}
+                </div>
+                <div v-if="event.description" class="text-body-2 mt-2 text-truncate-3-lines">
+                  {{ event.description }}
+                </div>
+              </v-card-text>
+              
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  size="small"
+                  @click.stop="emit('selectEvent', event)"
+                >
+                  View Details
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      </div>
       
       <v-alert
         v-else
@@ -179,11 +244,29 @@ function getCategoryIcon(category: string): string {
 </template>
 
 <style scoped>
-.event-item {
-  transition: background-color 0.2s ease;
+.event-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  overflow: hidden;
 }
-.event-item:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+
+.event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.text-truncate-3-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
