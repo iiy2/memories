@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 interface EventType {
   id: string;
@@ -29,6 +29,16 @@ const emit = defineEmits<{
 
 const search = ref('')
 const filterCategory = ref('All')
+const mobileFilterCategory = ref('All')
+
+// Keep mobile and desktop filters in sync
+watch(mobileFilterCategory, (newVal) => {
+  filterCategory.value = newVal
+})
+
+watch(filterCategory, (newVal) => {
+  mobileFilterCategory.value = newVal
+})
 
 // Generate category filter options
 const categories = computed(() => {
@@ -86,7 +96,8 @@ function getCategoryIcon(category: string): string {
     </v-card-title>
     
     <v-card-text>
-      <v-row align="center" justify="start">
+      <!-- Desktop search and filter -->
+      <v-row align="center" justify="start" class="d-none d-sm-flex">
         <v-col cols="12" sm="6" md="8">
           <v-text-field
             v-model="search"
@@ -136,29 +147,91 @@ function getCategoryIcon(category: string): string {
           </v-select>
         </v-col>
       </v-row>
+      
+      <!-- Mobile search and filter -->
+      <div class="d-sm-none">
+        <v-text-field
+          v-model="search"
+          clearable
+          hide-details
+          label="Search events..."
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          variant="solo-filled"
+          class="mb-2"
+        ></v-text-field>
+        
+        <div class="d-flex flex-wrap">
+          <v-chip-group
+            v-model="mobileFilterCategory"
+            selected-class="primary"
+            column
+            mandatory
+          >
+            <v-chip 
+              value="All" 
+              size="small"
+              class="mr-1 mb-1"
+            >
+              All
+            </v-chip>
+            <v-chip 
+              v-for="category in categories.filter(c => c !== 'All')" 
+              :key="category"
+              :value="category"
+              size="small"
+              :color="category === mobileFilterCategory ? getCategoryColor(category) : undefined"
+              class="mr-1 mb-1"
+            >
+              <v-icon 
+                :icon="getCategoryIcon(category)" 
+                size="x-small" 
+                start
+              ></v-icon>
+              {{ category }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+      </div>
 
       <!-- Show filter summary and count -->
-      <div class="d-flex align-center px-1 py-2">
-        <span class="text-subtitle-2">
-          <strong>{{ filteredEvents.length }}</strong> 
-          {{ filteredEvents.length === 1 ? 'event' : 'events' }} found
+      <div class="d-flex align-center px-1 py-2 flex-wrap">
+        <span class="text-subtitle-2 d-flex align-center flex-wrap">
+          <span class="d-inline-flex align-center mr-1">
+            <strong>{{ filteredEvents.length }}</strong>
+            <span class="ml-1">{{ filteredEvents.length === 1 ? 'event' : 'events' }}</span>
+          </span>
+          
           <template v-if="filterCategory && filterCategory !== 'All'">
-            in <v-chip size="x-small" :color="getCategoryColor(filterCategory)" class="ml-1">{{ filterCategory }}</v-chip>
+            <span class="mr-1 d-none d-sm-inline">in</span>
+            <v-chip size="x-small" :color="getCategoryColor(filterCategory)" class="mr-1">
+              {{ filterCategory }}
+            </v-chip>
           </template>
+          
           <template v-if="search">
-            <span class="ml-1">matching "<strong>{{ search }}</strong>"</span>
+            <span class="mr-1 d-none d-sm-inline">matching</span>
+            <v-chip size="x-small" color="primary" class="text-truncate" style="max-width: 150px;">
+              "{{ search }}"
+            </v-chip>
           </template>
         </span>
+        
         <v-spacer></v-spacer>
+        
         <v-btn 
           v-if="search || (filterCategory && filterCategory !== 'All')"
-          size="small" 
+          :size="$vuetify && $vuetify.display.xs ? 'x-small' : 'small'" 
           variant="text" 
           color="primary"
           @click="() => { search = ''; filterCategory = 'All'; }"
+          class="ml-auto mt-1 mt-sm-0"
         >
-          <v-icon start>mdi-filter-remove</v-icon>
-          Clear filters
+          <v-icon start :size="$vuetify && $vuetify.display.xs ? 'small' : 'default'">
+            mdi-filter-remove
+          </v-icon>
+          <span class="d-none d-sm-inline">Clear filters</span>
+          <span class="d-sm-none">Clear</span>
         </v-btn>
       </div>
     </v-card-text>
@@ -171,22 +244,29 @@ function getCategoryIcon(category: string): string {
           <v-col 
             v-for="event in filteredEvents" 
             :key="event.id"
-            cols="12" sm="6" md="4" lg="3"
-            class="pa-2"
+            cols="12" sm="6" md="4" lg="3" xl="2"
+            class="pa-1 pa-sm-2"
           >
             <v-card
-              elevation="2"
+              :elevation="$vuetify && $vuetify.display.xs ? 1 : 2"
               hover
               @click="emit('selectEvent', event)"
               class="event-card h-100"
             >
               <v-card-item>
                 <template v-slot:prepend>
-                  <v-avatar :color="getCategoryColor(event.category)" size="42">
-                    <v-icon :icon="getCategoryIcon(event.category)" color="white"></v-icon>
+                  <v-avatar 
+                    :color="getCategoryColor(event.category)" 
+                    :size="$vuetify && $vuetify.display.xs ? 36 : 42"
+                  >
+                    <v-icon 
+                      :icon="getCategoryIcon(event.category)" 
+                      color="white"
+                      :size="$vuetify && $vuetify.display.xs ? 'small' : 'default'"
+                    ></v-icon>
                   </v-avatar>
                 </template>
-                <v-card-title class="text-truncate">{{ event.title }}</v-card-title>
+                <v-card-title class="text-truncate pa-0">{{ event.title }}</v-card-title>
                 <template v-slot:append>
                   <v-btn
                     icon="mdi-delete"
@@ -194,34 +274,38 @@ function getCategoryIcon(category: string): string {
                     color="error"
                     density="compact"
                     @click.stop="emit('deleteEvent', event.id)"
+                    size="small"
                   ></v-btn>
                 </template>
               </v-card-item>
               
-              <v-card-text class="pb-0">
-                <v-chip
-                  size="small"
-                  :color="getCategoryColor(event.category)"
-                  variant="flat"
-                  class="mb-2"
-                >
-                  {{ event.category }}
-                </v-chip>
-                <div class="text-body-2 text-medium-emphasis mt-1">
-                  <v-icon icon="mdi-calendar" size="small" class="mr-1"></v-icon>
-                  {{ formatDate(event.date) }}
+              <v-card-text class="pb-0 pt-1">
+                <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+                  <v-chip
+                    :size="$vuetify && $vuetify.display.xs ? 'x-small' : 'small'"
+                    :color="getCategoryColor(event.category)"
+                    variant="flat"
+                  >
+                    {{ event.category }}
+                  </v-chip>
+                  
+                  <div class="text-caption text-medium-emphasis d-flex align-center">
+                    <v-icon icon="mdi-calendar" size="x-small" class="mr-1"></v-icon>
+                    {{ formatDate(event.date) }}
+                  </div>
                 </div>
+                
                 <div v-if="event.description" class="text-body-2 mt-2 text-truncate-3-lines">
                   {{ event.description }}
                 </div>
               </v-card-text>
               
-              <v-card-actions>
+              <v-card-actions class="pt-1">
                 <v-spacer></v-spacer>
                 <v-btn
                   variant="text"
                   color="primary"
-                  size="small"
+                  :size="$vuetify && $vuetify.display.xs ? 'x-small' : 'small'"
                   @click.stop="emit('selectEvent', event)"
                 >
                   View Details

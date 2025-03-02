@@ -186,27 +186,71 @@ function handleLogout() {
   <!-- Show main application when authenticated -->
   <v-app v-else>
     <v-app-bar color="primary" dark app>
-      <v-app-bar-title>Memory AI - Your Life Events</v-app-bar-title>
+      <v-app-bar-title class="text-truncate">
+        <span class="d-none d-sm-inline">Memory AI - </span>
+        <span>Your Life Events</span>
+      </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        icon
-        @click="showEventForm = true"
-        title="Add new event"
-      >
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click="toggleSettingsDialog"
-        title="Settings"
-        class="ml-2"
-      >
-        <v-icon>mdi-cog</v-icon>
-      </v-btn>
-      <UserProfile 
-        class="ml-2"
-        @logout="handleLogout"
-      />
+      
+      <!-- Mobile menu for small screens -->
+      <v-menu v-if="$vuetify && $vuetify.display.smAndDown">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            icon
+            v-bind="props"
+            title="Menu"
+          >
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="showEventForm = true">
+            <template v-slot:prepend>
+              <v-icon>mdi-plus</v-icon>
+            </template>
+            <v-list-item-title>Add Event</v-list-item-title>
+          </v-list-item>
+          
+          <v-list-item @click="toggleSettingsDialog">
+            <template v-slot:prepend>
+              <v-icon>mdi-cog</v-icon>
+            </template>
+            <v-list-item-title>Settings</v-list-item-title>
+          </v-list-item>
+          
+          <v-divider></v-divider>
+          
+          <v-list-item @click="authStore.logout">
+            <template v-slot:prepend>
+              <v-icon>mdi-logout</v-icon>
+            </template>
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      
+      <!-- Normal buttons for larger screens -->
+      <template v-else>
+        <v-btn
+          icon
+          @click="showEventForm = true"
+          title="Add new event"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          @click="toggleSettingsDialog"
+          title="Settings"
+          class="ml-2"
+        >
+          <v-icon>mdi-cog</v-icon>
+        </v-btn>
+        <UserProfile 
+          class="ml-2"
+          @logout="handleLogout"
+        />
+      </template>
     </v-app-bar>
 
     <v-main>

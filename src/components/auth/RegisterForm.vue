@@ -76,9 +76,9 @@ const goToLogin = () => {
 </script>
 
 <template>
-  <v-card class="mx-auto" max-width="500">
+  <v-card class="mx-auto" :elevation="$vuetify && $vuetify.display.smAndDown ? 0 : 2">
     <v-card-title class="text-h5 text-center py-4">
-      <v-icon icon="mdi-account-plus" class="mr-2" size="large"></v-icon>
+      <v-icon icon="mdi-account-plus" class="mr-2" :size="$vuetify && $vuetify.display.smAndDown ? 'default' : 'large'"></v-icon>
       Create Account
     </v-card-title>
     

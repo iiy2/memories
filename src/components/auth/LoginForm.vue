@@ -89,10 +89,11 @@ const goToRegister = () => {
 </script>
 
 <template>
-  <v-card class="mx-auto" max-width="500">
+  <v-card class="mx-auto" :elevation="$vuetify && $vuetify.display.smAndDown ? 0 : 2">
     <v-card-title class="text-h5 text-center py-4">
-      <v-icon icon="mdi-account" class="mr-2" size="large"></v-icon>
-      Login to Memory AI
+      <v-icon icon="mdi-account" class="mr-2" :size="$vuetify && $vuetify.display.smAndDown ? 'default' : 'large'"></v-icon>
+      <span class="d-none d-sm-inline">Login to Memory AI</span>
+      <span class="d-sm-none">Login</span>
     </v-card-title>
     
     <v-divider></v-divider>
