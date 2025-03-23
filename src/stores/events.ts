@@ -11,7 +11,6 @@ import {
   timestampToDate
 } from '../firebase/firestore'
 import { useAuthStore } from './auth'
-import { Timestamp } from 'firebase/firestore'
 
 // Interface for local events (with Date objects instead of Timestamps)
 export interface Event {
