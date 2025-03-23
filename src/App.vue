@@ -12,8 +12,8 @@ import UserProfile from './components/auth/UserProfile.vue'
 import { useAuthStore } from './stores/auth'
 import { useEventStore } from './stores/events'
 import { useEventTypeStore } from './stores/eventTypes'
-import { EventType } from './stores/eventTypes'
-import { Event } from './stores/events'
+import type { EventType } from './stores/eventTypes'
+import type { Event } from './stores/events'
 
 // Initialize stores
 const authStore = useAuthStore()
