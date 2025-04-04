@@ -1,89 +1,61 @@
 # Memory AI - Life Events Tracker
 
-A Progressive Web App (PWA) for storing and tracking important events from your life. Built with Vue 3, TypeScript, and Vuetify (Material UI).
-
-## Features
-
-- Create and store life events with title, date, category, and description
-- View events in a categorized list
-- See detailed information about each event
-- Delete events you no longer want to track
-- Data persists in local storage
-- **Progressive Web App (PWA) Features:**
-  - Installable on desktop and mobile devices
-  - Works offline
-  - Fast load times
-  - Automatic updates
-  - Responsive design for all screen sizes
-
-## Categories
-
-- Personal
-- Work
-- Family
-- Health
-- Travel
-- Other
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (version 16 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd memory-ai
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-### Building for Production
-
-```bash
-npm run build
-```
-
-This will generate optimized production files in the `dist` directory.
-
-## Tech Stack
-
-- Vue 3 with Composition API
-- TypeScript
-- Vuetify (Material UI)
-- Vite
-- localStorage for data persistence
-- Progressive Web App (PWA) features using:
-  - vite-plugin-pwa
-  - Service Workers
-  - Web App Manifest
+Memory AI is a comprehensive application that helps you track and organize your important life events. This project includes both web (Vue) and mobile (Flutter) applications that share the same backend infrastructure.
 
 ## Project Structure
 
-- `src/App.vue` - Main application component
-- `src/components/` - Vue components
-  - `EventForm.vue` - Form for adding new events
-  - `EventList.vue` - List of all stored events
-  - `EventDetail.vue` - Detailed view of a selected event
-  - `PwaNotification.vue` - PWA update and offline notifications
-- `src/main.ts` - Application entry point with Vuetify and PWA configuration
-- `public/` - Static assets and PWA icons
-- `vite.config.ts` - Vite configuration including PWA settings
+The repository is organized as follows:
+
+```
+memory-ai/
+├── memory-vue/       # Vue.js web application
+├── memory_flutter/   # Flutter mobile application
+└── shared/           # Shared resources (Firebase rules, etc.)
+```
+
+## Applications
+
+### Vue Web App
+
+The Vue.js application provides a web interface for the Memory AI service.
+
+- **Tech Stack**: Vue 3, Vuetify, Firebase Authentication, Firestore
+- **Setup**: See [memory-vue/README.md](memory-vue/README.md) for instructions
+
+### Flutter Mobile App
+
+The Flutter application provides a native mobile experience for iOS and Android.
+
+- **Tech Stack**: Flutter, Provider, Firebase Authentication, Firestore
+- **Setup**: See [memory_flutter/README.md](memory_flutter/README.md) for instructions
+
+## Shared Resources
+
+The `shared` directory contains resources that are common to both applications, such as:
+
+- Firebase security rules
+- API schema definitions
+- Shared documentation
+
+## Features
+
+Both applications provide the following features:
+
+- User authentication (login, register, logout)
+- Create, view, and delete life events
+- Categorize events with customizable event types
+- Filter events by category and search by text
+- Customize event categories with colors and icons
+- Real-time data synchronization with Firestore
+
+## Development
+
+To work on both applications side by side:
+
+1. Set up the Vue application
+2. Set up the Flutter application
+3. Use the same Firebase project for both to share authentication and database
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
