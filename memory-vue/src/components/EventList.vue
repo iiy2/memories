@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import EventTimer from './EventTimer.vue'
 
 interface EventType {
   id: string;
@@ -289,9 +290,18 @@ function getCategoryIcon(category: string): string {
                     {{ event.category }}
                   </v-chip>
                   
-                  <div class="text-caption text-medium-emphasis d-flex align-center">
-                    <v-icon icon="mdi-calendar" size="x-small" class="mr-1"></v-icon>
-                    {{ formatDate(event.date) }}
+                  <div class="d-flex flex-column align-end">
+                    <div class="text-caption text-medium-emphasis d-flex align-center">
+                      <v-icon icon="mdi-calendar" size="x-small" class="mr-1"></v-icon>
+                      {{ formatDate(event.date) }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis d-flex align-center mt-1">
+                      <EventTimer 
+                        :eventDate="event.date" 
+                        :simple="true" 
+                        :textColor="getCategoryColor(event.category)"
+                      />
+                    </div>
                   </div>
                 </div>
                 

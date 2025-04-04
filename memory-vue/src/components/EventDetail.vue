@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import EventTimer from './EventTimer.vue'
+
 interface EventType {
   id: string;
   name: string;
@@ -76,6 +79,7 @@ function getCategoryIcon(category: string): string {
   const eventType = getEventType(category)
   return eventType ? eventType.icon : 'mdi-calendar'
 }
+
 </script>
 
 <template>
@@ -104,6 +108,27 @@ function getCategoryIcon(category: string): string {
         </div>
       </div>
     </div>
+    
+    <!-- Life Timer -->
+    <v-card
+      elevation="1"
+      class="mb-6 life-timer"
+      variant="outlined"
+      rounded="lg"
+    >
+      <v-card-item :prepend-icon="`mdi-clock-time-eight-outline`" :title="`Time since this event`" />
+      <v-divider></v-divider>
+      <v-card-text class="text-center pa-4">
+        <div class="text-h5 font-weight-bold" :style="`color: ${getCategoryColor(event.category)}`" style="min-height: 40px;">
+          <EventTimer 
+            :eventDate="event.date" 
+            :simple="false" 
+            :key="`timer-${event.id}`"
+            :textColor="getCategoryColor(event.category)"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
     
     <v-divider class="mb-6"></v-divider>
     
@@ -134,6 +159,15 @@ function getCategoryIcon(category: string): string {
 
 .event-description {
   margin-bottom: 24px;
+}
+
+.life-timer {
+  transition: all 0.3s ease;
+}
+
+.life-timer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Print styles for when user wants to print an event */
