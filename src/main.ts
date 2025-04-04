@@ -9,8 +9,9 @@ import './style.css'
 import App from './App.vue'
 import { registerSW } from 'virtual:pwa-register'
 
-// Register service worker for PWA
-const updateSW = registerSW({
+// Register service worker for PWA without storing the update function
+// since we're handling updates in the PwaNotification component
+registerSW({
   onNeedRefresh() {
     // Show a notification to the user when a new version is available
     console.log('New content available, click on reload button to update.')

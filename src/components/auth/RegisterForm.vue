@@ -14,7 +14,7 @@ const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
-const formValid = ref(false)
+const formValid = ref<boolean | null>(false)
 const loading = ref(false)
 const error = ref('')
 

@@ -5,27 +5,26 @@ import { registerSW } from 'virtual:pwa-register'
 const showRefreshNotification = ref(false)
 const showOfflineNotification = ref(false)
 const offlineNotificationTimeout = ref<number | null>(null)
+// Move updateSW declaration outside of onMounted to make it accessible to all functions
+const updateSW = registerSW({
+  onNeedRefresh() {
+    showRefreshNotification.value = true
+  },
+  onOfflineReady() {
+    showOfflineNotification.value = true
+    
+    // Hide offline notification after 3 seconds
+    if (offlineNotificationTimeout.value) {
+      clearTimeout(offlineNotificationTimeout.value)
+    }
+    
+    offlineNotificationTimeout.value = window.setTimeout(() => {
+      showOfflineNotification.value = false
+    }, 3000)
+  },
+})
 
 onMounted(() => {
-  // Register service worker for PWA
-  const updateSW = registerSW({
-    onNeedRefresh() {
-      showRefreshNotification.value = true
-    },
-    onOfflineReady() {
-      showOfflineNotification.value = true
-      
-      // Hide offline notification after 3 seconds
-      if (offlineNotificationTimeout.value) {
-        clearTimeout(offlineNotificationTimeout.value)
-      }
-      
-      offlineNotificationTimeout.value = window.setTimeout(() => {
-        showOfflineNotification.value = false
-      }, 3000)
-    },
-  })
-  
   // Check if we're offline
   if (!navigator.onLine) {
     showOfflineNotification.value = true
@@ -42,8 +41,8 @@ onMounted(() => {
 })
 
 function refreshApp() {
-  // This function will reload the window to get the latest version
-  window.location.reload()
+  // Use the updateSW function to update the service worker
+  updateSW(true)
   showRefreshNotification.value = false
 }
 
