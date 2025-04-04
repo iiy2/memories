@@ -277,11 +277,11 @@ function handleRemove(id: string) {
             
             <template v-slot:append>
               <v-switch
-                v-model="eventType.enabled"
+                :model-value="eventType.enabled"
                 color="primary"
                 density="compact"
                 hide-details
-                @update:model-value="emit('toggleEventType', eventType.id)"
+                @update:model-value="() => emit('toggleEventType', eventType.id)"
                 class="mr-2"
               ></v-switch>
               

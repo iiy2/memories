@@ -93,14 +93,27 @@ class FirestoreService {
   
   // Toggle event type enabled status
   Future<void> toggleEventType(String id) async {
-    final doc = await _eventTypesCollection.doc(id).get();
-    if (doc.exists) {
-      final data = doc.data() as Map<String, dynamic>;
-      final now = DateTime.now();
-      await _eventTypesCollection.doc(id).update({
-        'enabled': !(data['enabled'] ?? true),
-        'updatedAt': Timestamp.fromDate(now),
-      });
+    try {
+      final doc = await _eventTypesCollection.doc(id).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        final now = DateTime.now();
+        final currentEnabled = data['enabled'];
+        
+        // Make sure we have a boolean value (defaulting to true if not set)
+        final isEnabled = currentEnabled is bool ? currentEnabled : true;
+        
+        // Toggle to the opposite value
+        await _eventTypesCollection.doc(id).update({
+          'enabled': !isEnabled,
+          'updatedAt': Timestamp.fromDate(now),
+        });
+        
+        print('Toggled event type $id from $isEnabled to ${!isEnabled}');
+      }
+    } catch (e) {
+      print('Error toggling event type: $e');
+      throw e;
     }
   }
   
