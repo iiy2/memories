@@ -1,27 +1,24 @@
 {
   "name": "memory-ai",
+  "version": "1.0.0",
+  "description": "Memory AI - Life Events Tracker (Vue + Flutter)",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "vue:dev": "cd memory-vue && npm run dev",
+    "vue:build": "cd memory-vue && npm run build",
+    "vue:lint": "cd memory-vue && npm run lint",
+    "vue:preview": "cd memory-vue && npm run preview",
+    "flutter:run": "cd memory_flutter && flutter run",
+    "flutter:build-android": "cd memory_flutter && flutter build apk",
+    "flutter:build-ios": "cd memory_flutter && flutter build ios",
+    "deploy:rules": "firebase deploy --only firestore:rules"
   },
-  "dependencies": {
-    "@mdi/font": "^7.4.47",
-    "firebase": "^11.4.0",
-    "pinia": "^3.0.1",
-    "vue": "^3.5.13",
-    "vuetify": "^3.7.14"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.6.2",
-    "@vue/tsconfig": "^0.7.0",
-    "typescript": "~5.7.2",
-    "vite": "^4.5.9",
-    "vite-plugin-pwa": "^0.21.1",
-    "vue-tsc": "^2.2.4",
-    "workbox-window": "^7.3.0"
-  }
+  "keywords": [
+    "vue",
+    "flutter",
+    "firebase",
+    "memory"
+  ],
+  "author": "",
+  "license": "MIT"
 }

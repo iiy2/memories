@@ -1,0 +1,27 @@
+{
+  "name": "memory-ai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "firebase": "^11.4.0",
+    "pinia": "^3.0.1",
+    "vue": "^3.5.13",
+    "vuetify": "^3.7.14"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.6.2",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.7.2",
+    "vite": "^4.5.9",
+    "vite-plugin-pwa": "^0.21.1",
+    "vue-tsc": "^2.2.4",
+    "workbox-window": "^7.3.0"
+  }
+}
