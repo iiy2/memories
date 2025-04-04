@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memory_flutter/models/event.dart';
 import 'package:memory_flutter/models/event_type.dart';
 import 'package:memory_flutter/utils/date_utils.dart';
+import 'package:memory_flutter/widgets/compact_life_timer.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -62,12 +63,26 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  Text(
-                    DateFormatUtils.formatDate(event.date),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        DateFormatUtils.formatDate(event.date),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      CompactLifeTimer(
+                        eventDate: event.date,
+                        textStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                        textColor: Colors.white,
+                      ),
+                    ],
                   ),
                 ],
               ),

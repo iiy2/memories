@@ -5,6 +5,9 @@ import 'package:memory_flutter/models/event_type.dart';
 import 'package:memory_flutter/providers/event_provider.dart';
 import 'package:memory_flutter/providers/event_type_provider.dart';
 import 'package:memory_flutter/utils/date_utils.dart';
+import 'package:memory_flutter/widgets/life_timer.dart';
+import 'package:memory_flutter/widgets/life_timer_alt.dart';
+import 'package:memory_flutter/widgets/compact_life_timer.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
@@ -258,6 +261,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          
+          // Life Timer with light background and colored text
+          Container(
+            width: double.infinity,
+            child: LifeTimerAlt(
+              key: ValueKey('event-timer-${event.id}'),
+              eventDate: event.date,
+              accentColor: color,
+            ),
+          ),
+          
           const SizedBox(height: 24),
           
           // Description section
