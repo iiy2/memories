@@ -82,7 +82,8 @@ const nameRules = [
   (v: string) => /^[a-zA-Z0-9 ]+$/.test(v) || 'Name can only contain letters, numbers, and spaces'
 ]
 
-const formValid = ref(false)
+// Fix: Change type to accept boolean | null
+const formValid = ref<boolean | null>(false)
 const editMode = ref(false)
 const editingEventTypeId = ref('')
 
@@ -96,6 +97,7 @@ const sortedEventTypes = computed(() => {
 })
 
 function submitForm() {
+  // Fix: Add null check to properly handle the type
   if (!formValid.value) return
   
   if (editMode.value) {
@@ -148,6 +150,11 @@ function handleRemove(id: string) {
   }
   
   emit('removeEventType', id)
+}
+
+// Function to safely toggle the event type
+function handleToggle(eventType: EventType) {
+  emit('toggleEventType', eventType.id)
 }
 </script>
 
@@ -277,11 +284,11 @@ function handleRemove(id: string) {
             
             <template v-slot:append>
               <v-switch
-                v-model="eventType.enabled"
+                :model-value="!!eventType.enabled"
                 color="primary"
                 density="compact"
                 hide-details
-                @update:model-value="emit('toggleEventType', eventType.id)"
+                @update:model-value="handleToggle(eventType)"
                 class="mr-2"
               ></v-switch>
               

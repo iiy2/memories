@@ -26,7 +26,8 @@ const title = ref('')
 const date = ref('')
 const description = ref('')
 const category = ref('')
-const formValid = ref(false)
+// Fix: Change type to accept boolean | null since v-form's v-model can be null
+const formValid = ref<boolean | null>(false)
 const formSubmitting = ref(false)
 
 // Set default date to today
@@ -62,6 +63,7 @@ function getEventType(name: string): EventType | undefined {
 }
 
 async function submitForm() {
+  // Fix: Add null check to properly handle the type
   if (!formValid.value) return
   
   formSubmitting.value = true
@@ -69,7 +71,7 @@ async function submitForm() {
   try {
     emit('addEvent', {
       title: title.value,
-      date: new Date(date.value),
+      date: date.value,
       description: description.value,
       category: category.value
     })
