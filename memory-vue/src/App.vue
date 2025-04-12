@@ -62,9 +62,13 @@ const eventToDeleteName = computed(() => {
 })
 
 // Add a new event
-async function addEvent(event: Omit<Event, 'id'>) {
+async function addEvent(event: { title: string; date: string; description: string; category: string; }) {
   try {
-    await eventStore.addEvent(event)
+    // Convert string date to Date object before adding to store
+    await eventStore.addEvent({
+      ...event,
+      date: new Date(event.date)
+    })
     showEventForm.value = false
   } catch (error) {
     console.error('Error adding event:', error)
@@ -104,8 +108,14 @@ function cancelDeleteEvent() {
 }
 
 // Select an event to view details
-function selectEvent(event: Event) {
-  selectedEvent.value = event
+function selectEvent(event: any) {
+  // Convert the string date back to a Date object if needed
+  const processedEvent = {
+    ...event,
+    date: typeof event.date === 'string' ? new Date(event.date) : event.date
+  } as Event
+  
+  selectedEvent.value = processedEvent
   showEventDetail.value = true
 }
 
@@ -264,7 +274,7 @@ function handleLogout() {
         
         <!-- Main Events List -->
         <EventList 
-          :events="eventStore.events"
+          :events="eventStore.events.map(e => ({...e, date: e.date instanceof Date ? e.date.toISOString() : e.date}))"
           :event-types="eventTypeStore.eventTypes"
           @select-event="selectEvent" 
           @delete-event="confirmDeleteEvent" 
@@ -313,7 +323,7 @@ function handleLogout() {
         </v-card-title>
         <v-card-text>
           <EventDetail 
-            :event="selectedEvent"
+            :event="{...selectedEvent, date: typeof selectedEvent.date === 'object' ? selectedEvent.date.toISOString() : selectedEvent.date}"
             :event-types="eventTypeStore.eventTypes"
           />
         </v-card-text>
