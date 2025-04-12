@@ -284,11 +284,11 @@ function handleToggle(eventType: EventType) {
             
             <template v-slot:append>
               <v-switch
-                :model-value="!!eventType.enabled"
+                :model-value="eventType.enabled"
                 color="primary"
                 density="compact"
                 hide-details
-                @update:model-value="handleToggle(eventType)"
+                @update:model-value="() => emit('toggleEventType', eventType.id)"
                 class="mr-2"
               ></v-switch>
               
